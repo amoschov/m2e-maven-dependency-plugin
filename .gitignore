@@ -1,2 +1,23 @@
-target
-.DS_Store
+# svn
+.svn
+
+# eclipse  files
+.project
+.metadata
+.classpath
+.springBeans*
+.settings/
+.externalToolBuilders/
+*.teeproject
+test-output/
+
+# intellij files
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# temp. project files
+target/
+bin/
+gen/

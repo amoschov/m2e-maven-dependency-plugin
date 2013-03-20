@@ -14,7 +14,6 @@ public class MdpProjectConfigurator extends AbstractProjectConfigurator {
 	@Override
 	public AbstractBuildParticipant getBuildParticipant(IMavenProjectFacade projectFacade, MojoExecution execution,
 			IPluginExecutionMetadata executionMetadata) {
-
 		return new MdpBuildParticipant(execution);
 	}
 

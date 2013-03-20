@@ -19,8 +19,14 @@ import org.eclipse.m2e.core.project.configurator.MojoExecutionBuildParticipant;
 import org.eclipse.osgi.util.NLS;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
-public class MdpBuildParticipant extends MojoExecutionBuildParticipant {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+public class MdpBuildParticipant extends MojoExecutionBuildParticipant {
+//    @Requirement
+//    private Logger log;
+  
+	private static final Logger log = LoggerFactory.getLogger( MdpBuildParticipant.class );
 	private static final String ARTIFACT_ITEMS_PROPERTY = "artifactItems";
 
 	private static final String OUTPUT_DIRECTORY_PROPERTY = "outputDirectory";
@@ -28,14 +34,17 @@ public class MdpBuildParticipant extends MojoExecutionBuildParticipant {
 	public MdpBuildParticipant(MojoExecution execution) {
 
 		super(execution, true);
+		log.debug( "MdpBuildParticipant()");		
 	}
 
 	@Override
 	public Set<IProject> build(final int kind, final IProgressMonitor monitor) throws Exception {
-
+		log.debug( "Handling build event : {}", kind);		
 		final IMaven maven = MavenPlugin.getMaven();
 		final MojoExecution mojoExecution = getMojoExecution();
 		final BuildContext buildContext = getBuildContext();
+		log.debug( "MojoExecution : {}", mojoExecution);		
+		log.debug( "BuildContext : {}", buildContext);		
 
 		if (mojoExecution == null) {
 			return null;
@@ -44,14 +53,17 @@ public class MdpBuildParticipant extends MojoExecutionBuildParticipant {
 		setTaskName(monitor);
 
 		final Set<IProject> result = executeMojo(kind, monitor);
+		log.debug( "Mojo Result : '{}'", result);		
 
 		final Set<File> outputDirectories = getOutputDirectories(maven, mojoExecution);
 
 		for (File outputDirectory : outputDirectories) {
+			log.debug( "Going to refresh outputDirectory : {}", outputDirectory);		
 
 			refreshOutputDirectory(buildContext, outputDirectory);
 		}
 
+		log.debug( "Build completed. Result: '{}'", result);		
 		return result;
 	}
 
@@ -68,7 +80,9 @@ public class MdpBuildParticipant extends MojoExecutionBuildParticipant {
 
 		Method getOutputDirectoryMethod = null;
 
+		log.debug( "Getting  outputDirectories {}", artifactItems);		
 		for (Object artifactItem : artifactItems) {
+			log.debug( "Processing {}", artifactItem);		
 
 			if (getOutputDirectoryMethod == null) {
 
@@ -79,10 +93,12 @@ public class MdpBuildParticipant extends MojoExecutionBuildParticipant {
 			File artifactItemOutputDirectory = (File) getOutputDirectoryMethod.invoke(artifactItem);
 
 			if (artifactItemOutputDirectory != null) {
+				log.info( "Artifact {} uses {}", artifactItem,artifactItemOutputDirectory);		
 
 				outputDirectories.add(artifactItemOutputDirectory);
 
 			} else {
+				log.info( "Artifact {} uses gloablOutput {}", artifactItem,globalOutputDirectory);		
 
 				outputDirectories.add(globalOutputDirectory);
 			}
@@ -113,6 +129,7 @@ public class MdpBuildParticipant extends MojoExecutionBuildParticipant {
 	}
 
 	private void refreshOutputDirectory(final BuildContext buildContext, final File outputDirectory) {
+		log.info("Refreshing outputDirectory {}", outputDirectory);		
 
 		if (outputDirectory != null && outputDirectory.exists()) {
 
